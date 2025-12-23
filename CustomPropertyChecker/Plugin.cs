@@ -152,10 +152,20 @@ public class Plugin : BaseUnityPlugin
     private void OnGameInitialized()
     {
         gameObject.AddComponent<PunCallbacks>();
-        NetworkSystem.Instance.OnJoinedRoomEvent += (Action)OnJoinedRoom;
+        NetworkSystem.Instance.OnJoinedRoomEvent        += (Action)OnJoinedRoom;
+        NetworkSystem.Instance.OnReturnedToSinglePlayer += () => PlayerProperties.Clear();
+        NetworkSystem.Instance.OnPlayerJoined           += (Action<NetPlayer>)OnPlayerJoined;
     }
 
     private void OnJoinedRoom()
+    {
+        PlayerProperties.Clear();
+
+        foreach ((NetPlayer netPlayer, VRRig rig) in GorillaParent.instance.vrrigDict)
+            PlayerProperties[rig] = netPlayer.GetPlayerRef().CustomProperties;
+    }
+
+    private void OnPlayerJoined(NetPlayer newPlayer)
     {
         PlayerProperties.Clear();
 
