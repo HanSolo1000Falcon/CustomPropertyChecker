@@ -13,7 +13,7 @@ public class Plugin : BaseUnityPlugin
 {
     public static Dictionary<VRRig, Hashtable> PlayerProperties = new();
 
-    private bool isOpen;
+    private bool    isOpen;
     private Vector2 scrollPosition;
 
     private void Start()
@@ -34,26 +34,26 @@ public class Plugin : BaseUnityPlugin
 
         GUIStyle boxStyle = new(GUI.skin.box)
         {
-            fontSize = 14,
-            padding = new RectOffset(10, 10, 5, 5),
-            alignment = TextAnchor.UpperLeft,
+                fontSize  = 14,
+                padding   = new RectOffset(10, 10, 5, 5),
+                alignment = TextAnchor.UpperLeft,
         };
 
         GUIStyle nameStyle = new(GUI.skin.label)
         {
-            fontSize = 16,
-            fontStyle = FontStyle.Bold,
+                fontSize  = 16,
+                fontStyle = FontStyle.Bold,
         };
 
         GUILayout.BeginArea(new Rect(20, 20, 400, Screen.height - 40));
         GUILayout.BeginVertical(" ", boxStyle);
 
         scrollPosition = GUILayout.BeginScrollView(
-            scrollPosition,
-            false,
-            true,
-            GUILayout.Width(380),
-            GUILayout.Height(Screen.height - 80)
+                scrollPosition,
+                false,
+                true,
+                GUILayout.Width(380),
+                GUILayout.Height(Screen.height - 80)
         );
 
         foreach ((VRRig rig, Hashtable properties) in PlayerProperties)
@@ -102,7 +102,7 @@ public class Plugin : BaseUnityPlugin
                     string spaces = "  ";
                     for (int i = 0; i < depth; i++)
                         spaces += "  ";
-                    
+
                     builder.Append(spaces + FormatValue(entry.Key, depth + 1));
                     builder.Append(": ");
                     builder.Append(FormatValue(entry.Value, depth + 1));
@@ -113,8 +113,9 @@ public class Plugin : BaseUnityPlugin
                 string spacesOther = " ";
                 for (int i = 0; i < depth; i++)
                     spacesOther += " ";
-                
+
                 builder.Append(spacesOther + "\n}");
+
                 return builder.ToString();
             }
         }
@@ -135,7 +136,7 @@ public class Plugin : BaseUnityPlugin
                 string spaces = "  ";
                 for (int i = 0; i < depth; i++)
                     spaces += "  ";
-                
+
                 builder.Append(spaces + FormatValue(item, depth + 1));
                 first = false;
             }
@@ -143,8 +144,9 @@ public class Plugin : BaseUnityPlugin
             string spacesOther = " ";
             for (int i = 0; i < depth; i++)
                 spacesOther += " ";
-            
+
             builder.Append(spacesOther + "\n]");
+
             return builder.ToString();
         }
     }
@@ -152,20 +154,13 @@ public class Plugin : BaseUnityPlugin
     private void OnGameInitialized()
     {
         gameObject.AddComponent<PunCallbacks>();
-        NetworkSystem.Instance.OnJoinedRoomEvent        += (Action)OnJoinedRoom;
+        NetworkSystem.Instance.OnJoinedRoomEvent        += (Action)DoRecalculation;
         NetworkSystem.Instance.OnReturnedToSinglePlayer += () => PlayerProperties.Clear();
-        NetworkSystem.Instance.OnPlayerJoined           += (Action<NetPlayer>)OnPlayerJoined;
+        NetworkSystem.Instance.OnPlayerJoined           += player => DoRecalculation();
+        NetworkSystem.Instance.OnPlayerLeft             += player => DoRecalculation();
     }
 
-    private void OnJoinedRoom()
-    {
-        PlayerProperties.Clear();
-
-        foreach ((NetPlayer netPlayer, VRRig rig) in GorillaParent.instance.vrrigDict)
-            PlayerProperties[rig] = netPlayer.GetPlayerRef().CustomProperties;
-    }
-
-    private void OnPlayerJoined(NetPlayer newPlayer)
+    private void DoRecalculation()
     {
         PlayerProperties.Clear();
 
