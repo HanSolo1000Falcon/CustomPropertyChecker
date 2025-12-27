@@ -16,10 +16,7 @@ public class Plugin : BaseUnityPlugin
     private bool    isOpen;
     private Vector2 scrollPosition;
 
-    private void Start()
-    {
-        GorillaTagger.OnPlayerSpawned(OnGameInitialized);
-    }
+    private void Start() => GorillaTagger.OnPlayerSpawned(OnGameInitialized);
 
     private void Update()
     {
@@ -60,7 +57,7 @@ public class Plugin : BaseUnityPlugin
         {
             GUILayout.BeginVertical(boxStyle);
 
-            GUILayout.Label(rig.OwningNetPlayer.NickName, nameStyle);
+            GUILayout.Label(rig.OwningNetPlayer.SanitizedNickName, nameStyle);
             GUILayout.Space(5);
 
             foreach (DictionaryEntry entry in properties)
